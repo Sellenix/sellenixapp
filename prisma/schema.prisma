@@ -1,13 +1,89 @@
-// ... (keep existing models)
+// This is your Prisma schema file
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  role          String    @default("USER")
+  firstName     String?
+  lastName      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  isActive      Boolean   @default(true)
+  lastLoginAt   DateTime?
+  subscriptions Subscription[]
+  orders        Order[]
+}
 
 model SiteSettings {
-  id              String @id @default(cuid())
+  id              String  @id @default(cuid())
   siteName        String
   siteUrl         String
   defaultLanguage String
   metaDescription String?
   metaKeywords    String?
+  theme           String  @default("light")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
-// ... (keep other models)
+model Subscription {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  planId    String
+  plan      Plan     @relation(fields: [planId], references: [id])
+  startDate DateTime @default(now())
+  endDate   DateTime?
+  status    String   @default("ACTIVE")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Plan {
+  id            String   @id @default(cuid())
+  name          String
+  description   String?
+  price         Float
+  interval      String   @default("month")
+  features      Json?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  subscriptions Subscription[]
+}
+
+model Order {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  amount      Float
+  status      String   @default("PENDING")
+  paymentId   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Template {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  thumbnail   String?
+  html        String   @db.LongText
+  css         String?  @db.LongText
+  js          String?  @db.LongText
+  category    String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
 
