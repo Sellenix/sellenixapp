@@ -17,20 +17,15 @@ then
 fi
 
 # Installeer benodigde pakketten
-apt install -y npm nginx mysql-server
-
-# MySQL setup
-mysql -e "CREATE DATABASE IF NOT EXISTS sellenix_db;"
-mysql -e "CREATE USER IF NOT EXISTS 'sellenix_user'@'localhost' IDENTIFIED BY 'yigitemirK2016@@';"
-mysql -e "GRANT ALL PRIVILEGES ON sellenix_db.* TO 'sellenix_user'@'localhost';"
-mysql -e "FLUSH PRIVILEGES;"
+apt install -y nginx mysql-server
 
 # Kloon de repository
 git clone https://github.com/Sellenix/sellenixapp.git /var/www/sellenix
 cd /var/www/sellenix
 
-# Update package.json om date-fns versie te corrigeren
+# Update package.json om date-fns versie te corrigeren en andere dependencies toe te voegen
 sed -i 's/"date-fns": "4.1.0"/"date-fns": "^2.30.0"/' package.json
+npm install --save @types/node @types/react
 
 # Installeer dependencies
 npm install --legacy-peer-deps
@@ -40,7 +35,7 @@ cat > .env << EOL
 NODE_ENV=production
 NEXTAUTH_URL=https://sellenix.com
 NEXTAUTH_SECRET=$(openssl rand -base64 32)
-DATABASE_URL="mysql://sellenix_user:yigitemirK2016@@localhost:3306/sellenix_db"
+DATABASE_URL="mysql://root:LPUxVCpTjAgHmwN4aahg@localhost:3306/sellenix"
 MOLLIE_API_KEY=your_mollie_api_key
 IS_INSTALLED=false
 EOL
@@ -93,8 +88,9 @@ server {
 }
 EOL
 
-# Verwijder de standaard Nginx configuratie
-rm /etc/nginx/sites-enabled/default
+# Verwijder de standaard Nginx configuratie en eventuele bestaande symlinks
+rm -f /etc/nginx/sites-enabled/default
+rm -f /etc/nginx/sites-enabled/sellenix
 
 # Activeer de nieuwe configuratie
 ln -s /etc/nginx/sites-available/sellenix /etc/nginx/sites-enabled/
