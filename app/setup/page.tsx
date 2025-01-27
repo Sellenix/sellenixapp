@@ -7,8 +7,11 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { toast } from "@/components/ui/use-toast"
 
 export default function SetupPage() {
+  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
   const [formData, setFormData] = useState({
     siteName: "",
     siteUrl: "",
@@ -18,18 +21,19 @@ export default function SetupPage() {
     adminEmail: "",
     adminPassword: "",
   })
-  const router = useRouter()
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData({ ...formData, [name]: value })
+  const handleSelectChange = (value: string) => {
+    setFormData({ ...formData, defaultLanguage: value })
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setIsLoading(true)
+
     try {
       const response = await fetch("/api/setup", {
         method: "POST",
@@ -37,14 +41,30 @@ export default function SetupPage() {
         body: JSON.stringify(formData),
       })
 
-      if (response.ok) {
-        router.push("/dashboard")
-      } else {
-        throw new Error("Setup failed")
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || "Setup failed")
       }
+
+      toast({
+        title: "Setup Complete",
+        description: "Your application has been configured successfully.",
+      })
+
+      // Delay redirect slightly to show the success message
+      setTimeout(() => {
+        router.push("/dashboard")
+      }, 1500)
     } catch (error) {
       console.error("Setup error:", error)
-      // Here you would typically show an error message to the user
+      toast({
+        title: "Setup Failed",
+        description: error instanceof Error ? error.message : "An unexpected error occurred",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -56,20 +76,17 @@ export default function SetupPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="siteName">Site Name</Label>
               <Input id="siteName" name="siteName" value={formData.siteName} onChange={handleChange} required />
             </div>
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="siteUrl">Site URL</Label>
               <Input id="siteUrl" name="siteUrl" value={formData.siteUrl} onChange={handleChange} required />
             </div>
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="defaultLanguage">Default Language</Label>
-              <Select
-                value={formData.defaultLanguage}
-                onValueChange={(value) => handleSelectChange("defaultLanguage", value)}
-              >
+              <Select value={formData.defaultLanguage} onValueChange={handleSelectChange}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a language" />
                 </SelectTrigger>
@@ -77,11 +94,10 @@ export default function SetupPage() {
                   <SelectItem value="en">English</SelectItem>
                   <SelectItem value="es">Spanish</SelectItem>
                   <SelectItem value="fr">French</SelectItem>
-                  {/* Add more languages as needed */}
                 </SelectContent>
               </Select>
             </div>
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="metaDescription">Meta Description</Label>
               <Input
                 id="metaDescription"
@@ -90,15 +106,22 @@ export default function SetupPage() {
                 onChange={handleChange}
               />
             </div>
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="metaKeywords">Meta Keywords</Label>
               <Input id="metaKeywords" name="metaKeywords" value={formData.metaKeywords} onChange={handleChange} />
             </div>
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="adminEmail">Admin Email</Label>
-              <Input id="adminEmail" name="adminEmail" value={formData.adminEmail} onChange={handleChange} required />
+              <Input
+                id="adminEmail"
+                name="adminEmail"
+                type="email"
+                value={formData.adminEmail}
+                onChange={handleChange}
+                required
+              />
             </div>
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="adminPassword">Admin Password</Label>
               <Input
                 id="adminPassword"
@@ -109,7 +132,9 @@ export default function SetupPage() {
                 required
               />
             </div>
-            <Button type="submit">Complete Setup</Button>
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Setting up..." : "Complete Setup"}
+            </Button>
           </form>
         </CardContent>
       </Card>

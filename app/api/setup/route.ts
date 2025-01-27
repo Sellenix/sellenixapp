@@ -2,27 +2,33 @@ import { NextResponse } from "next/server"
 import { PrismaClient } from "@prisma/client"
 import bcrypt from "bcrypt"
 
+// Create a single PrismaClient instance
 const prisma = new PrismaClient()
 
 export async function POST(request: Request) {
   try {
-    const { siteName, siteUrl, defaultLanguage, metaDescription, metaKeywords, adminEmail, adminPassword } =
-      await request.json()
+    const body = await request.json()
+    const { siteName, siteUrl, defaultLanguage, metaDescription, metaKeywords, adminEmail, adminPassword } = body
+
+    // Validate required fields
+    if (!siteName || !siteUrl || !defaultLanguage || !adminEmail || !adminPassword) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+    }
 
     // Create site settings
-    await prisma.siteSettings.create({
+    const siteSettings = await prisma.siteSettings.create({
       data: {
         siteName,
         siteUrl,
         defaultLanguage,
-        metaDescription,
-        metaKeywords,
+        metaDescription: metaDescription || "",
+        metaKeywords: metaKeywords || "",
       },
     })
 
-    // Create admin user
+    // Hash password and create admin user
     const hashedPassword = await bcrypt.hash(adminPassword, 10)
-    await prisma.user.create({
+    const user = await prisma.user.create({
       data: {
         email: adminEmail,
         password: hashedPassword,
@@ -30,14 +36,23 @@ export async function POST(request: Request) {
       },
     })
 
-    // Update the IS_INSTALLED environment variable
-    // Note: In a production environment, you might want to use a more secure method to store this flag
+    // Write to a file to indicate installation is complete
+    // Note: In production, you should use a more secure method
     process.env.IS_INSTALLED = "true"
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({
+      success: true,
+      siteSettings,
+      user: { email: user.email, role: user.role },
+    })
   } catch (error) {
     console.error("Setup error:", error)
-    return NextResponse.json({ error: "Setup failed" }, { status: 500 })
+    return NextResponse.json(
+      { error: "Setup failed", details: error instanceof Error ? error.message : "Unknown error" },
+      { status: 500 },
+    )
+  } finally {
+    await prisma.$disconnect()
   }
 }
 
