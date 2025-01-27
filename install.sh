@@ -9,20 +9,15 @@ fi
 # Update systeem
 apt update && apt upgrade -y
 
-# Installeer benodigde pakketten
-apt install -y nodejs npm postgresql nginx
+# Zorg ervoor dat Node.js 20 is geïnstalleerd
+if ! command -v node &> /dev/null || [ $(node -v | cut -d'.' -f1 | tr -d 'v') -lt 20 ]
+then
+    curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+    apt-get install -y nodejs
+fi
 
-# PostgreSQL setup
-sudo -u postgres psql << EOF
-CREATE DATABASE sellenix_db;
-CREATE USER sellenix_user WITH ENCRYPTED PASSWORD 'yigitemirK2016@@';
-GRANT ALL PRIVILEGES ON DATABASE sellenix_db TO sellenix_user;
-\c sellenix_db
-GRANT ALL ON SCHEMA public TO sellenix_user;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO sellenix_user;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO sellenix_user;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO sellenix_user;
-EOF
+# Installeer benodigde pakketten
+apt install -y npm nginx
 
 # Kloon de repository
 git clone https://github.com/uw-repo-url/sellenix.git /var/www/sellenix
@@ -34,9 +29,9 @@ npm install
 # Maak .env bestand aan
 cat > .env << EOL
 NODE_ENV=production
-NEXTAUTH_URL=https://uwdomeinnaam.com
+NEXTAUTH_URL=https://sellenix.com
 NEXTAUTH_SECRET=$(openssl rand -base64 32)
-DATABASE_URL="postgresql://sellenix_user:yigitemirK2016@@localhost:5432/sellenix_db?schema=public"
+DATABASE_URL="mysql://sellenix_user:yigitemirK2016@@localhost:3306/sellenix_db"
 MOLLIE_API_KEY=your_mollie_api_key
 IS_INSTALLED=false
 EOL
@@ -62,7 +57,7 @@ pm2 save
 cat > /etc/nginx/sites-available/sellenix << EOL
 server {
     listen 80;
-    server_name uwdomeinnaam.com;
+    server_name sellenix.com www.sellenix.com;
 
     location / {
         proxy_pass http://localhost:3000;
@@ -78,5 +73,5 @@ EOL
 ln -s /etc/nginx/sites-available/sellenix /etc/nginx/sites-enabled/
 nginx -t && systemctl restart nginx
 
-echo "Installatie voltooid! Ga naar http://uwdomeinnaam.com/install om de setup te voltooien."
+echo "Installatie voltooid! Ga naar http://sellenix.com/install om de setup te voltooien."
 
