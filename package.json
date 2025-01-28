@@ -60,7 +60,9 @@
     "zod": "^3.24.1",
     "next-auth": "latest",
     "@prisma/client": "latest",
-    "bcrypt": "latest"
+    "bcrypt": "latest",
+    "readline": "latest",
+    "@next-auth/prisma-adapter": "latest"
   },
   "devDependencies": {
     "@types/node": "^22",
