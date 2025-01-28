@@ -1,0 +1,19 @@
+sellenixapp/
+├── app/
+│   ├── page.tsx (frontpage)
+│   ├── dashboard/
+│   │   └── page.tsx
+│   ├── admin/
+│   │   └── page.tsx
+│   └── api/
+│       └── auth/
+│           └── [...nextauth]/
+│               └── route.ts
+├── components/
+│   └── ui/
+│       └── button.tsx
+├── lib/
+│   └── utils.ts
+└── prisma/
+    └── schema.prisma
+

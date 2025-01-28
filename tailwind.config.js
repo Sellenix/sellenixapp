@@ -5,8 +5,6 @@ module.exports = {
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
-    "app/**/*.{ts,tsx}",
-    "components/**/*.{ts,tsx}",
   ],
   theme: {
     extend: {
@@ -44,11 +42,17 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Cyberpunk kleuren
+        "cyber-black": "#0d0d0d",
+        "cyber-blue": "#00ffff",
+        "cyber-pink": "#ff00ff",
+        "cyber-yellow": "#ffff00",
       },
-      borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+      backgroundImage: {
+        "cyber-grid": "url('/cyber-grid.png')",
+      },
+      fontFamily: {
+        cyber: ["Orbitron", "sans-serif"],
       },
     },
   },

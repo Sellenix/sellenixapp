@@ -3,6 +3,8 @@
 import { useState } from "react"
 import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 export default function Login() {
   const [email, setEmail] = useState("")
@@ -18,7 +20,6 @@ export default function Login() {
     })
 
     if (result?.error) {
-      // Handle error
       console.error(result.error)
     } else {
       router.push("/dashboard")
@@ -26,38 +27,61 @@ export default function Login() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="px-8 py-6 mt-4 text-left bg-white shadow-lg">
-        <h3 className="text-2xl font-bold text-center">Login to your account</h3>
-        <form onSubmit={handleSubmit}>
-          <div className="mt-4">
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="max-w-md w-full space-y-8 p-10 bg-card rounded-xl shadow-2xl border border-primary">
+        <div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-primary">Login to Sellenix</h2>
+        </div>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <div className="rounded-md shadow-sm -space-y-px">
             <div>
-              <label className="block" htmlFor="email">
-                Email
+              <label htmlFor="email-address" className="sr-only">
+                Email address
               </label>
               <input
-                type="text"
-                placeholder="Email"
-                className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
+                id="email-address"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-muted placeholder-muted-foreground text-foreground rounded-t-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
+                placeholder="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
-            <div className="mt-4">
-              <label className="block">Password</label>
+            <div>
+              <label htmlFor="password" className="sr-only">
+                Password
+              </label>
               <input
+                id="password"
+                name="password"
                 type="password"
+                autoComplete="current-password"
+                required
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-muted placeholder-muted-foreground text-foreground rounded-b-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
                 placeholder="Password"
-                className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
-            <div className="flex items-baseline justify-between">
-              <button className="px-6 py-2 mt-4 text-white bg-blue-600 rounded-lg hover:bg-blue-900">Login</button>
-            </div>
+          </div>
+
+          <div>
+            <Button
+              type="submit"
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+            >
+              Sign in
+            </Button>
           </div>
         </form>
+        <div className="text-center">
+          <Link href="/" className="font-medium text-primary hover:text-primary/90">
+            Back to Home
+          </Link>
+        </div>
       </div>
     </div>
   )
