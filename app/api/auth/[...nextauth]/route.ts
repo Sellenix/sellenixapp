@@ -2,9 +2,13 @@ import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import { PrismaClient } from "@prisma/client"
-import bcrypt from "bcrypt"
+import crypto from "crypto"
 
 const prisma = new PrismaClient()
+
+const hashPassword = (password: string) => {
+  return crypto.createHash("sha256").update(password).digest("hex")
+}
 
 export const authOptions = {
   adapter: PrismaAdapter(prisma),
@@ -28,7 +32,7 @@ export const authOptions = {
           return null
         }
 
-        const isPasswordValid = await bcrypt.compare(credentials.password, user.password)
+        const isPasswordValid = user.password === hashPassword(credentials.password)
 
         if (!isPasswordValid) {
           return null
@@ -43,7 +47,7 @@ export const authOptions = {
     }),
   ],
   pages: {
-    signIn: "/admin",
+    signIn: "/auth/login",
   },
   callbacks: {
     async jwt({ token, user }) {
