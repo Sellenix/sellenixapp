@@ -4,15 +4,20 @@ import { useState } from "react"
 import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import Link from "next/link"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export default function Login() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [error, setError] = useState("")
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError("")
     const result = await signIn("credentials", {
       redirect: false,
       email,
@@ -20,7 +25,7 @@ export default function Login() {
     })
 
     if (result?.error) {
-      console.error(result.error)
+      setError("Invalid email or password")
     } else {
       router.push("/dashboard")
     }
@@ -32,35 +37,40 @@ export default function Login() {
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-primary">Login to Sellenix</h2>
         </div>
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
-              <label htmlFor="email-address" className="sr-only">
+              <Label htmlFor="email-address" className="sr-only">
                 Email address
-              </label>
-              <input
+              </Label>
+              <Input
                 id="email-address"
                 name="email"
                 type="email"
                 autoComplete="email"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-muted placeholder-muted-foreground text-foreground rounded-t-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
+                className="rounded-t-md"
                 placeholder="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div>
-              <label htmlFor="password" className="sr-only">
+              <Label htmlFor="password" className="sr-only">
                 Password
-              </label>
-              <input
+              </Label>
+              <Input
                 id="password"
                 name="password"
                 type="password"
                 autoComplete="current-password"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-muted placeholder-muted-foreground text-foreground rounded-b-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
+                className="rounded-b-md"
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -68,19 +78,27 @@ export default function Login() {
             </div>
           </div>
 
+          <div className="flex items-center justify-between">
+            <div className="text-sm">
+              <Link href="/auth/forgot-password" className="font-medium text-primary hover:text-primary/90">
+                Forgot your password?
+              </Link>
+            </div>
+          </div>
+
           <div>
-            <Button
-              type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-            >
+            <Button type="submit" className="w-full">
               Sign in
             </Button>
           </div>
         </form>
         <div className="text-center">
-          <Link href="/" className="font-medium text-primary hover:text-primary/90">
-            Back to Home
-          </Link>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Not a member?{" "}
+            <Link href="/auth/register" className="font-medium text-primary hover:text-primary/90">
+              Register now
+            </Link>
+          </p>
         </div>
       </div>
     </div>
