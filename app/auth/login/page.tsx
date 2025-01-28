@@ -78,14 +78,6 @@ export default function Login() {
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
-            <div className="text-sm">
-              <Link href="/auth/forgot-password" className="font-medium text-primary hover:text-primary/90">
-                Forgot your password?
-              </Link>
-            </div>
-          </div>
-
           <div>
             <Button type="submit" className="w-full">
               Sign in
@@ -93,12 +85,9 @@ export default function Login() {
           </div>
         </form>
         <div className="text-center">
-          <p className="mt-2 text-sm text-muted-foreground">
-            Not a member?{" "}
-            <Link href="/auth/register" className="font-medium text-primary hover:text-primary/90">
-              Register now
-            </Link>
-          </p>
+          <Link href="/" className="font-medium text-primary hover:text-primary/90">
+            Back to Home
+          </Link>
         </div>
       </div>
     </div>
