@@ -4,14 +4,22 @@ import { getToken } from "next-auth/jwt"
 
 export async function middleware(request: NextRequest) {
   const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
+  const { pathname } = request.nextUrl
 
-  // Check if user is authenticated
-  if (!token && !request.nextUrl.pathname.startsWith("/auth")) {
-    return NextResponse.redirect(new URL("/auth/login", request.url))
+  // Allow public routes
+  if (pathname === "/" || pathname.startsWith("/_next") || pathname.startsWith("/api")) {
+    return NextResponse.next()
   }
 
-  // If authenticated user tries to access auth pages, redirect to dashboard
-  if (token && request.nextUrl.pathname.startsWith("/auth")) {
+  // Protected admin/dashboard routes
+  if (pathname.startsWith("/dashboard") || pathname.startsWith("/admin")) {
+    if (!token) {
+      return NextResponse.redirect(new URL("/auth/login", request.url))
+    }
+  }
+
+  // Redirect authenticated users away from auth pages
+  if (token && pathname.startsWith("/auth")) {
     return NextResponse.redirect(new URL("/dashboard", request.url))
   }
 
@@ -19,6 +27,6 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\.png$).*)"],
 }
 

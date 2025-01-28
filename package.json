@@ -58,10 +58,9 @@
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.6",
     "zod": "^3.24.1",
-    "next-auth": "latest",
     "@prisma/client": "latest",
     "bcrypt": "latest",
-    "readline": "latest",
+    "next-auth": "latest",
     "@next-auth/prisma-adapter": "latest"
   },
   "devDependencies": {
